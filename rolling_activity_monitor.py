@@ -16,19 +16,23 @@ def rolling_activity_monitor(projects):     # returns a value that works with gr
 		session_number, in_session_index, count = 0, 0, 0
 		set_interval_length = 120    # seconds
 		session_timeout = 120    # minutes
-
+		point = 0
+		snap_session_start = 0
 		
 		for snap in range(len(projects[i].snapshots)):
 
 			activity_start = projects[i].snapshots[snap].send_date
+			point = (activity_start - projects[i].snapshots[snap_session_start].send_date).total_seconds()
 			date = activity_start.strftime("%d %B, %Y")
 
 			if projects[i].snapshots[snap].send_date_delta.total_seconds()/60 >= session_timeout:
 
-				in_session_index, count = 0, 0
+				snap_session_start = snap
+				in_session_index, count, point = 0, 0, 0
 				session_number += 1
 				sessions["session %s" %session_number] = {}
-				sessions["session %s" %session_number][in_session_index] = (activity_start.strftime("%H:%M"), count, activity_start, date)
+				sessions["session %s" %session_number][in_session_index] = (point, count, activity_start, date)
+
 
 			else:
 
@@ -38,7 +42,7 @@ def rolling_activity_monitor(projects):     # returns a value that works with gr
 					else:
 						break
 
-				sessions["session %s" %session_number][in_session_index] = (activity_start.strftime("%H:%M"), count, activity_start, date)
+				sessions["session %s" %session_number][in_session_index] = (point, count, activity_start, date)
 				count = 0
 				in_session_index += 1
 
@@ -63,3 +67,26 @@ def rolling_activity_monitor(projects):     # returns a value that works with gr
 		data["project %s" %i] = (X, Y, dates, full_time_marks)
 
 	return data
+
+
+def graph_activity_rolling(data):             # sequentially plots one session at a time, starting with session 1 project 1 and ending with the last session in the final project
+
+    project_number = 1
+
+    for project in data:
+
+        num_sessions = len(data[project][0])
+        
+        for session_number in range(num_sessions):
+
+            plt.clf()
+            plt.title(('Project %s ' %(project_number)) + ('Session Number %r' %(session_number + 1)) + ' - ' + data[project][2][session_number])
+            plt.xlabel('Time marks from start of session (seconds)')
+            plt.ylabel('Number of edits in previous 2 minutes')
+            plt.scatter(data[project][0][session_number], data[project][1][session_number])
+            plt.plot(data[project][0][session_number], data[project][1][session_number])
+            input('Press any key to display next plot')
+
+            plt.show()
+
+        project_number += 1
