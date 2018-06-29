@@ -90,3 +90,25 @@ def graph_activity_rolling(data):             # sequentially plots one session a
             plt.show()
 
         project_number += 1
+
+
+
+def high_activity_periods(data, activity_threshold = 30):      		   # This is just an arbitrary number for the threshold.
+
+	active_periods = {}
+
+	for project in data:
+
+		active_periods[project] = {}
+
+		for session_num in range(len(data[project][1])):
+
+			active_periods[project]['session %s' %session_num] = []
+
+			for point in range(len(data[project][1][session_num])):
+
+				if data[project][1][session_num][point] >= activity_threshold:
+
+					active_periods[project]['session %s' %session_num].append((data[project][3][session_num][point], data[project][1][session_num][point]))
+
+	return active_periods
