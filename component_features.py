@@ -16,16 +16,16 @@ def has_feature_component(component, feature):
 
 def identify_component_features(project, features):
 
-	list_of_total_features = []
+	dict_of_features = {}
 
 	for snap in project.snapshots:
 		for component in snap.screen.components:
 			for feature in features:
 
-				if has_feature_component(component, feature) and feature not in list_of_total_features:
-					list_of_total_features.append(feature)
+				if has_feature_component(component, feature) and feature not in dict_of_features:
+					dict_of_features[feature] = snap
 
-	return list_of_total_features
+	return dict_of_features
 
 
 def count_component_features(project, features):
@@ -38,12 +38,12 @@ def count_component_features(project, features):
 
 				if has_feature_component(component, feature):
 					if feature in dict_of_total_features:
-						if component.id not in dict_of_total_features[feature][0]:
-							dict_of_total_features[feature][0].append(component.id)
-							dict_of_total_features[feature][1] += 1
+						if component.id not in dict_of_total_features[feature]:
+							dict_of_total_features[feature][component.id] = snap
+							dict_of_total_features[feature]['count'] += 1
 					else:
-						dict_of_total_features[feature] = [[component.id], 1]
-
+						dict_of_total_features[feature] = {component.id: snap, 'count':  1}
+						
 	return dict_of_total_features
 
 

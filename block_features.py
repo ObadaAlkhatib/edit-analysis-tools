@@ -179,35 +179,35 @@ def has_feature_block(block, feature):
 
 
 
-def identify_block_features(block_features, project):
+def identify_block_features(project, block_features):
 
-	list_of_total_features = []
+	dict_of_features = {}
 
 	for snap in project.snapshots:
 		for block in snap.screen.blocks:
-			for feature in features:
+			for feature in block_features:
 
-				if has_feature_block(block, feature) and feature not in list_of_total_features:
-						list_of_total_features.append(feature)
+				if has_feature_block(block, feature) and feature not in dict_of_features:
+					dict_of_features[feature] = snap
 
-	return list_of_total_features
+	return dict_of_features
 
 
-def count_block_features(block_features, project):
+def count_block_features(project, block_features):
 
 	dict_of_total_features = {}
 
 	for snap in project.snapshots:
 		for block in snap.screen.blocks:
-			for feature in features:
+			for feature in block_features:
 
 				if has_feature_block(block, feature):
 					if feature in dict_of_total_features:
-						if block.id not in dict_of_total_features[feature][0]:
-							dict_of_total_features[feature][0].append(block.id)
-							dict_of_total_features[feature][1] += 1
+						if block.id not in dict_of_total_features[feature]:
+							dict_of_total_features[feature][block.id] = snap
+							dict_of_total_features[feature]['count'] += 1
 					else:
-						dict_of_total_features[feature] = [[block.id], 1]
+						dict_of_total_features[feature] = {block.id: snap, 'count':  1}
 
 	return dict_of_total_features
 
